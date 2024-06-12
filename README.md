@@ -20,19 +20,314 @@
 
 ## API Server
 
-- POST `/api/something`: purpose
-  - request parameters and request body content
-  - response body content
-  - response status codes and possible errors
-- GET `/api/something`: purpose
-  - request parameters
-  - response body content
-  - response status codes and possible errors
-- PUT `/api/something`: purpose
-  - request parameters and request body content
-  - response body content
-  - response status codes and possible errors
-- ...
+### Session APIs
+
+- POST `/api/sessions`: Create a new authentication session (login)
+    - request parameters: none
+    - request body content: 
+    ```json
+    {
+        "username": "<username>",
+        "password": "<password>"
+    }
+    ```
+    - response body content: (if successful):
+    ```json
+    {
+        "username": "<username>"
+    }
+    ```
+    - Access Constraints: None
+    - response status codes:
+        - 200 if successful
+        - 401 if credentials wrong
+        - 422 if the request body is not well-formed
+
+- GET `/api/sessions/current`: Retrieve the currently authenticated user
+    - request parameters: none
+    - request body content: none
+    - response body content: (if successful):
+    ```json
+    {
+        "username": "<username>"
+    }
+    ```
+    - Access Constraints: can be called only by a logged user
+    - response status codes:
+        - 200 if successful
+        - 401 if user is not authenticated
+
+- DELETE `/api/sessions/current`: Delete the current authentication session (logout)
+    - request parameters: none
+    - request body content: none
+    - response body content: none
+    - Access Constraints: can be called only by a logged user
+    - response status codes:
+        - 200 if successful
+        - 401 if user is not authenticated
+
+### User APIs
+- POST `/api/users`: Add a new user
+    - request parameters: none
+    - request body content: 
+    ```json
+    {
+        "username": "<username>",
+        "password": "<password>"
+    }
+    ```
+    - response body content: (if successful):
+    ```json
+    {
+        "username": "<username>"
+    }
+    ```
+    - Access Constraints: None
+    - response status codes:
+        - 201 if the user is created
+        - 409 if the username already exists
+        - 422 if the request body is not well-formed
+
+- PATCH `/api/users/current`: Change the password of the currently logged user
+    - request parameters: none
+    - request body content:
+    ```json
+    {
+        "password": "<newPassword>"
+    }
+    ```
+    - response body content (if successful):
+    ```json
+    { "message": "password updated" }
+    ```
+    - Access Constraints: can be called only by a logged user
+    - response status codes:
+        - 200 if successful
+        - 422 if the request body is not well-formed
+        - 401 if user is not authenticated
+
+- GET `/api/users/current/games`: Get all games played by the current user
+    - request parameters: none
+    - request body content: none
+    - response body content: (if successful):
+    ```json
+    [
+        {
+            "game": <game_id>,
+            "rounds": 
+            [
+                {
+                    "meme": "<meme_filename>",
+                    "caption": "<caption>",
+                    "won": <true / false>,
+                    "date: "<date>",
+                },
+                {
+                    "meme": "<meme_filename>",
+                    "caption": "<caption>",
+                    "won": <true / false>,
+                    "date: "<date>",
+                },
+                {
+                    "meme": "<meme_filename>",
+                    "caption": "<caption>",
+                    "won": <true / false>,
+                    "date: "<date>",
+                },
+            ],
+        },
+        ...
+    ]
+    ```
+    - Access Constraints: can be called only by a logged user
+    - response status codes:
+        - 200 if successful
+        - 401 if user is not authenticated
+
+### Games APIs
+- GET `/api/game`: Get one meme along with captions if user is anonymous, get three if user is logged in. Captions generated are 7, 2 of them are correct while 5 are wrong.
+    - request parameters: none
+    - request body content: none
+    - response body content for anonymous users: (if successful):
+    ```json
+    [
+        {
+            "meme": "<meme_filename>",
+            "captions":
+            [
+                {   
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+            ]
+        }
+    ]
+    ```
+    - response body content for logged users: (if successful):
+    ```json
+    [
+        {
+            "meme": "<meme_filename>",
+            "captions":
+            [
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+            ]
+        },
+        {
+            "meme": "<meme_filename>",
+            "captions":
+            [
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+            ]
+        },
+        {
+            "meme": "<meme_filename>",
+            "captions":
+            [
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "caption_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+            ]
+        }
+    ]
+    ```
+    - Access Constraints: none
+    - response status codes:
+        - 200 if successful
+
+- POST `/api/game`: Send answer for a round. If the user is logged the round will be recorded.
+    - request parameters: none
+    - request body content:
+    ```json
+    {
+        "meme": "<meme_filename>",
+        "caption_id": <caption_id>,
+        "captions":
+        [
+            <caption_id>,
+            <caption_id>,
+            <caption_id>,
+            <caption_id>,
+            <caption_id>,
+            <caption_id>,
+            <caption_id>
+        ]
+    }
+    ```
+    - response body content: (if successful):
+    ```json
+    {
+        "won": <true / false>,
+        "caption1": "<correct_caption>",
+        "caption2": "<correct_caption>",
+    }
+    ```
+    - Access Constraints: none
+    - response status codes:
+        - 200 if successful
 
 ## Database Tables
 
@@ -64,6 +359,7 @@ columns:
 - **g_meme** TEXT FOREIGN KEY                                   -> contains the filename of the meme
 - **g_c_id** INTEGER FOREIGN KEY                                -> contains the id of the caption
 - **valid** INTEGER NOT NULL CHECK (valid IN (0, 1))            -> contains the value of the game (0 = lost, 1 = won)
+- **g_date** TEXT NOT NULL                                      -> contains the timestamp of the game
 
 ### Table `memes_captions`
 columns:
@@ -94,6 +390,7 @@ CREATE TABLE games (
     g_meme TEXT NOT NULL,
     g_c_id INTEGER NOT NULL,
     valid INTEGER NOT NULL CHECK (valid IN (0, 1)),
+    g_date TEXT NOT NULL,
     PRIMARY KEY (g_id, g_round),
     FOREIGN KEY (g_user) REFERENCES users(username),
     FOREIGN KEY (g_meme) REFERENCES memes(filename),
