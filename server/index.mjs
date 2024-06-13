@@ -19,7 +19,7 @@ app.use(express.json());
 
 /** Set up and enable Cross-Origin Resource Sharing (CORS) **/
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173/api',
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -92,7 +92,7 @@ const isLoggedIn = (req, res, next) => {
 /* ====== Session APIs ====== */
 
 /** 
- * POST /api/sessions
+ * POST /v1/sessions
  * Body: username, password
  * Response:    200 if success
  *              401 if credentials wrong
@@ -100,7 +100,7 @@ const isLoggedIn = (req, res, next) => {
  * Description: Login with username and password
  * 
  **/
-app.post('/api/sessions',
+app.post('/v1/sessions',
     body("username").isString(),
     body("password").isString(),
     validateRequest,
@@ -122,14 +122,14 @@ app.post('/api/sessions',
 );
 
 /**
- * GET /api/sessions/current
+ * GET /v1/sessions/current
  * Response:    200 with username if authenticated
  *              401 if not authenticated
  * 
  * Description: Get current session username
  * 
  **/
-app.get('/api/sessions/current',
+app.get('/v1/sessions/current',
     validateRequest,
     isLoggedIn,
     (req, res) => {
@@ -139,14 +139,14 @@ app.get('/api/sessions/current',
 );
 
 /**
- * DELETE /api/sessions/current
+ * DELETE /v1/sessions/current
  * Response:    200 if success
  *              401 if not authenticated
  * 
  * Description: Logout current session
  * 
  **/
-app.delete('/api/sessions/current',
+app.delete('/v1/sessions/current',
     validateRequest,
     isLoggedIn,
     (req, res) => {
@@ -160,7 +160,7 @@ app.delete('/api/sessions/current',
 /* ====== User APIs ====== */
 
 /**
- * POST /api/users
+ * POST /v1/users
  * Body: username, password
  * Response:    200 with username if success
  *              409 if username already existing
@@ -169,7 +169,7 @@ app.delete('/api/sessions/current',
  * Description: Create a new user
  * 
  **/
-app.post('/api/users',
+app.post('/v1/users',
     body("username").isString(),
     body("password").isString(),
     validateRequest,
@@ -190,7 +190,7 @@ app.post('/api/users',
 );
 
 /**
- * PATCH /api/users/current
+ * PATCH /v1/users/current
  * Body: password
  * Response:    200 if success
  *              401 if not authenticated
@@ -199,7 +199,7 @@ app.post('/api/users',
  * Description: Update current user password
  * 
  **/
-app.patch('/api/users/current',
+app.patch('/v1/users/current',
     body("password").isString(),
     validateRequest,
     isLoggedIn,
@@ -216,14 +216,14 @@ app.patch('/api/users/current',
 );
 
 /**
- * GET /api/users/current/games
+ * GET /v1/users/current/games
  * Response:    200 with games if success
  *              401 if not authenticated
  * 
  * Description: Get all games played by current user
  * 
  **/
-app.get('/api/users/current/games',
+app.get('/v1/users/current/games',
     validateRequest,
     isLoggedIn,
     (req, res, next) => {
@@ -240,7 +240,7 @@ app.get('/api/users/current/games',
 /* ====== Games APIs ====== */
 
 /**
- * GET /api/game
+ * GET /v1/game
  * Response:    200 with memes and captions if success
  *              401 if not authenticated
  * 
@@ -249,7 +249,7 @@ app.get('/api/users/current/games',
  *              If not authenticated, return 1 meme with 2 right and 5 wrong captions
  * 
  **/
-app.get('/api/game',
+app.get('/v1/game',
     validateRequest,
     (req, res, next) => {
         if (req.isAuthenticated()) {
@@ -274,7 +274,7 @@ app.get('/api/game',
 );
 
 /**
- * POST /api/game
+ * POST /v1/game
  * Body: meme, caption_id, captions
  * Response:    200 with won if success
  *              401 if not authenticated
@@ -284,7 +284,7 @@ app.get('/api/game',
  *              If not authenticated check answer only
  * 
  **/
-app.post('/api/game',
+app.post('/v1/game',
     body("meme").isString(),
     body("caption_id").isInt(),
     body("captions").isArray(),
