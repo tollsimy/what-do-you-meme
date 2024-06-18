@@ -15,24 +15,27 @@ const userController = new UserController();
 
 const app = express();
 app.use(morgan('dev'));
-app.use(express.json());
+
+const router = express.Router();
+app.use('/api/v1/', router);
+router.use(express.json());
 
 /** Set up and enable Cross-Origin Resource Sharing (CORS) **/
 const corsOptions = {
-    origin: 'http://localhost:5173/api',
+    origin: 'http://localhost:5173',
     credentials: true,
 };
 app.use(cors(corsOptions));
 
 // enable sessions in Express
-app.use(session({
+router.use(session({
     secret: "secret",
     resave: false,
     saveUninitialized: false,
 }));
 
 // Register default error handler
-app.use((err, req, res, next) => {
+router.use((err, req, res, next) => {
     return res.status(503).json({
         error: "Internal Server Error",
         status: 503
@@ -54,7 +57,7 @@ passport.use(new LocalStrategy(function verify(username, password, callback) {
 }));
 
 // init Passport to use sessions
-app.use(passport.authenticate('session'));
+router.use(passport.authenticate('session'));
 
 passport.serializeUser((user, done) => {
     done(null, {
@@ -92,7 +95,7 @@ const isLoggedIn = (req, res, next) => {
 /* ====== Session APIs ====== */
 
 /** 
- * POST /v1/sessions
+ * POST /api/v1/sessions
  * Body: username, password
  * Response:    200 if success
  *              401 if credentials wrong
@@ -100,7 +103,7 @@ const isLoggedIn = (req, res, next) => {
  * Description: Login with username and password
  * 
  **/
-app.post('/v1/sessions',
+router.post('/sessions',
     body("username").isString(),
     body("password").isString(),
     validateRequest,
@@ -122,14 +125,14 @@ app.post('/v1/sessions',
 );
 
 /**
- * GET /v1/sessions/current
+ * GET /api/v1/sessions/current
  * Response:    200 with username if authenticated
  *              401 if not authenticated
  * 
  * Description: Get current session username
  * 
  **/
-app.get('/v1/sessions/current',
+router.get('/sessions/current',
     validateRequest,
     isLoggedIn,
     (req, res) => {
@@ -139,14 +142,14 @@ app.get('/v1/sessions/current',
 );
 
 /**
- * DELETE /v1/sessions/current
+ * DELETE /api/v1/sessions/current
  * Response:    200 if success
  *              401 if not authenticated
  * 
  * Description: Logout current session
  * 
  **/
-app.delete('/v1/sessions/current',
+router.delete('/sessions/current',
     validateRequest,
     isLoggedIn,
     (req, res) => {
@@ -160,7 +163,7 @@ app.delete('/v1/sessions/current',
 /* ====== User APIs ====== */
 
 /**
- * POST /v1/users
+ * POST /api/v1/users
  * Body: username, password
  * Response:    200 with username if success
  *              409 if username already existing
@@ -169,7 +172,7 @@ app.delete('/v1/sessions/current',
  * Description: Create a new user
  * 
  **/
-app.post('/v1/users',
+router.post('/users',
     body("username").isString(),
     body("password").isString(),
     validateRequest,
@@ -190,7 +193,7 @@ app.post('/v1/users',
 );
 
 /**
- * PATCH /v1/users/current
+ * PATCH /api/v1/users/current
  * Body: password
  * Response:    200 if success
  *              401 if not authenticated
@@ -199,7 +202,7 @@ app.post('/v1/users',
  * Description: Update current user password
  * 
  **/
-app.patch('/v1/users/current',
+router.patch('/users/current',
     body("password").isString(),
     validateRequest,
     isLoggedIn,
@@ -216,14 +219,14 @@ app.patch('/v1/users/current',
 );
 
 /**
- * GET /v1/users/current/games
+ * GET /api/v1/users/current/games
  * Response:    200 with games if success
  *              401 if not authenticated
  * 
- * Description: Get all games played by current user
+ * Description: Get all completed games played by current user
  * 
  **/
-app.get('/v1/users/current/games',
+router.get('/users/current/games',
     validateRequest,
     isLoggedIn,
     (req, res, next) => {
@@ -240,19 +243,20 @@ app.get('/v1/users/current/games',
 /* ====== Games APIs ====== */
 
 /**
- * GET /v1/game
+ * GET /api/v1/game
  * Response:    200 with memes and captions if success
  *              401 if not authenticated
  * 
  * Description: Get all material needed to play a game (memes and captions)
- *              If authenticated, return 3 memes with 2 right and 5 wrong captions
+ *              If authenticated, create a new game in the database and return 3 memes with 2 right and 5 wrong captions
  *              If not authenticated, return 1 meme with 2 right and 5 wrong captions
  * 
  **/
-app.get('/v1/game',
+router.get('/game',
     validateRequest,
     (req, res, next) => {
         if (req.isAuthenticated()) {
+            gameController.addGame(req.user.username)
             gameController.getNMemesWithCaptions(3)
                 .then((val) => {
                     res.json(val);
@@ -274,17 +278,17 @@ app.get('/v1/game',
 );
 
 /**
- * POST /v1/game
+ * POST /api/v1/game
  * Body: meme, caption_id, captions
  * Response:    200 with won if success
  *              401 if not authenticated
  * 
  * Description: Send chosen caption for a meme and return result
- *              If authenticated save the play
+ *              If authenticated save the round to the last game, if round = 3 mark game as completed
  *              If not authenticated check answer only
  * 
  **/
-app.post('/v1/game',
+router.post('/game',
     body("meme").isString(),
     body("caption_id").isInt(),
     body("captions").isArray(),
@@ -294,7 +298,7 @@ app.post('/v1/game',
             .then(({val, answer1, answer2}) => {
                 // If authenticated save play
                 if (req.isAuthenticated()) {
-                    gameController.saveGame(req.user.username, req.body.meme, req.body.caption_id, val)
+                    gameController.savePlay(req.user.username, req.body.meme, req.body.caption_id, val)
                         .then((_) => {
                             res.json({ won: val, caption1: answer1, caption2: answer2 });
                         })

@@ -4,10 +4,15 @@
 
 ## React Client Application Routes
 
-- Route `/`: page content and purpose
-- Route `/something/:param`: page content and purpose, param specification
-- ...
-
+- Route `/`: main page (index), shows game exaplination, allows to redirect to play page and allows to redirect to login page
+- Route `/login`: login page, allows users to log in using their credentials
+- Route `/signup`: signup page, allows a user to create a new account
+- Route `/profile`: user account page, shows username and allows to redirect to user games history
+    - Route `/profile/games`: user games history page, allows user to see previous played games
+    - Route `/profile/games/:game_id`: previous game page, allows user to see memes, choosen captions and points for a previously played game
+- Route `/play?round=<round_num>`: game page, allows user to play the game and navigate through rounds
+    - Route `/play/stats`: game stats page, shows stats about just played game, allows to redirect to main page or directly start a new game
+- Route `*`: wildcard route used to display a "404 error not found" page whenever the user enters an invalid URL
 
 ## Main React Components
 
@@ -119,20 +124,17 @@
                 {
                     "meme": "<meme_filename>",
                     "caption": "<caption>",
-                    "won": <true / false>,
-                    "date: "<date>",
+                    "won": <0 / 1>,
                 },
                 {
                     "meme": "<meme_filename>",
                     "caption": "<caption>",
-                    "won": <true / false>,
-                    "date: "<date>",
+                    "won": <0 / 1>,
                 },
                 {
                     "meme": "<meme_filename>",
                     "caption": "<caption>",
-                    "won": <true / false>,
-                    "date: "<date>",
+                    "won": <0 / 1>,
                 },
             ],
         },
@@ -298,7 +300,7 @@
     - response status codes:
         - 200 if successful
 
-- POST `/api/game`: Send answer for a round. If the user is logged the round will be recorded.
+- POST `/api/game`: Send answer for a round and get answer back.
     - request parameters: none
     - request body content:
     ```json
@@ -320,7 +322,7 @@
     - response body content: (if successful):
     ```json
     {
-        "won": <true / false>,
+        "won": <0 / 1>,
         "caption1": "<correct_caption>",
         "caption2": "<correct_caption>",
     }
@@ -354,12 +356,17 @@ columns:
 ### Table `games`
 columns:
 - **g_id** INTEGER PRIMARY KEY AUTOINCREMENT                    -> contains the id of the game
-- **g_round** INTEGER PRIMARY KEY CHECK (g_round IN (1, 2, 3))  -> contains the round of the game (1,2,3)
-- **g_user** TEXT FOREIGN KEY                                   -> contains the username of the user
-- **g_meme** TEXT FOREIGN KEY                                   -> contains the filename of the meme
-- **g_c_id** INTEGER FOREIGN KEY                                -> contains the id of the caption
-- **valid** INTEGER NOT NULL CHECK (valid IN (0, 1))            -> contains the value of the game (0 = lost, 1 = won)
-- **g_date** TEXT NOT NULL                                      -> contains the timestamp of the game
+- **g_user** TEXT FOREIGN KEY                                   -> contains the username of the user that played the game
+- **g_complete** INTEGER NOT NULL CHECK (g_complete IN (0, 1)) DEFAULT 0 -> contains the value of the game (0 = not completed, 1 = completed)
+
+### Table `rounds`
+columns:
+- **r_id** INTEGER PRIMARY KEY AUTOINCREMENT -> contains the id of the round
+- **r_g_id** INTEGER FOREIGN KEY             -> contains the id of the game
+- **r_meme** TEXT FOREIGN KEY                -> contains the filename of the meme
+- **r_c_id** INTEGER FOREIGN KEY             -> contains the id of the caption
+- **r_valid** INTEGER NOT NULL CHECK (r_valid IN (0, 1)) -> contains the value of the round (0 = lost, 1 = won)
+- **r_num** INTEGER NOT NULL CHECK (r_num IN (1, 2, 3)) -> contains the number of the round
 
 ### Table `memes_captions`
 columns:
@@ -385,16 +392,22 @@ CREATE TABLE captions (
 
 CREATE TABLE games (
     g_id INTEGER NOT NULL,
-    g_round INTEGER NOT NULL CHECK (g_round IN (1, 2, 3)),
     g_user TEXT NOT NULL,
-    g_meme TEXT NOT NULL,
-    g_c_id INTEGER NOT NULL,
-    valid INTEGER NOT NULL CHECK (valid IN (0, 1)),
-    g_date TEXT NOT NULL,
-    PRIMARY KEY (g_id, g_round),
-    FOREIGN KEY (g_user) REFERENCES users(username),
-    FOREIGN KEY (g_meme) REFERENCES memes(filename),
-    FOREIGN KEY (g_c_id) REFERENCES captions(c_id)
+    g_complete INTEGER NOT NULL CHECK (g_complete IN (0, 1)),
+    PRIMARY KEY (g_id),
+    FOREIGN KEY (g_user) REFERENCES users(username)
+);
+
+CREATE TABLE rounds (
+    r_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    r_g_id INTEGER NOT NULL,
+    r_meme TEXT NOT NULL,
+    r_c_id INTEGER NOT NULL,
+    r_valid INTEGER NOT NULL CHECK (r_valid IN (0, 1)) DEFAULT 0,
+    r_num INTEGER NOT NULL CHECK (r_num IN (1, 2, 3)),
+    FOREIGN KEY (r_g_id) REFERENCES games(g_id),
+    FOREIGN KEY (r_meme) REFERENCES memes(filename),
+    FOREIGN KEY (r_c_id) REFERENCES captions(c_id)
 );
 
 CREATE TABLE memes_captions (

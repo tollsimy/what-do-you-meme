@@ -31,9 +31,17 @@ export default function GameController() {
         }
     }
 
-    this.saveGame = async (user, meme, c_id, valid) => {
+    this.addGame = async (user) => {
         try {
-            return await gamesDao.saveGame(user, meme, c_id, valid, new Date());
+            return await gamesDao.addGame(user);
+        } catch(err) {
+            throw err;
+        }
+    }
+
+    this.savePlay = async (user, meme, c_id, valid) => {
+        try {
+            return await gamesDao.savePlay(user, meme, c_id, valid);
         } catch(err) {
             throw err;
         }

@@ -4,99 +4,133 @@ export default function GamesDao() {
 
     this.getGames = async (username) => {
         return new Promise((resolve, reject) => {
-            const sql = "SELECT * FROM games WHERE g_user = ? \
-                ORDER BY g_id AND g_round asc;";
-            db.all(sql, [username], async (err, rows) => {
+            // Get all completed games played by user
+            const sql = "SELECT * FROM games WHERE g_user = ? AND g_complete = 1 \
+                ORDER BY g_id asc;";
+            db.all(sql, [username], async (err, games) => {
                 if (err) { reject(err); }
-                else if (rows === undefined) { resolve(false); }
+                else if (games === undefined) { resolve([]); }
                 else {
-                    if (rows.length == 0) {
+                    if (games.length == 0) {
                         resolve([])
                     }
-                    let games_id = new Set();
-                    let games = [];
-                    // get all games_id
-                    for (const row of rows) {
-                        games_id.add(row.g_id);
-                    }
-                    // for each game
-                    for (const id of games_id) {
-                        // Create rounds array using only rounds with g_id = id
-                        // NOTE: since map use an async callback it returns an array of promises
-                        // thus, we need to resolve all, we can do this using Promise.all
-                        let rounds = await Promise.all(rows
-                            .filter((row) => row.g_id == id) // remove rounds with g_id != id
-                            .map(async (row) => {            // for each round
-                                // Get caption from caption_id
-                                const sql = "SELECT * FROM captions WHERE c_id = ?;";
-                                let caption = await new Promise((resolve, reject) => {
-                                    db.get(sql, [row.g_c_id], (err, rowCaption) => {
-                                        if (err) { reject(err); }
-                                        else if (rowCaption === undefined) { resolve(false); }
-                                        else {
-                                            resolve(rowCaption.caption);
+                    // map each game into a promise that gets all rounds for that game
+                    games.map((game) => {
+                        getRoundsByGameId(game.g_id).then((rounds) => {
+                            // get caption from r_c_id
+                            const captionsPromises = rounds.map((round) => {
+                                return getCaptionById(round.r_c_id);
+                            });
+                            Promise.all(captionsPromises)
+                                .then((captions) => {
+                                    // format data
+                                    game.rounds = rounds.map((round, index) => {
+                                        return {
+                                            meme: round.r_meme,
+                                            caption: captions[index],
+                                            won: round.r_valid
                                         }
                                     });
+                                    resolve({
+                                        game: game.g_id,
+                                        rounds: game.rounds
+                                    });
+                                })
+                                .catch((err) => {
+                                    reject(err);
                                 });
-                                // Finally create and return round object
-                                return {
-                                    meme: row.g_meme,
-                                    caption: caption,
-                                    won: row.valid,
-                                    date: row.g_date,
-                                }
-                            }));
-                        // Create game containing all rounds
-                        const game = {
-                            game: id,
-                            rounds: rounds,
-                        }
-                        // Add game to games array
-                        games.push(game);
-                    }
-                    resolve(games);
+                        });
+                    });
                 }
             });
         })
     }
 
-    this.saveGame = (user, meme, c_id, valid, date) => {
+    const getRoundsByGameId = (g_id) => {
         return new Promise((resolve, reject) => {
-            // Get next game id for user (same as max game id if round = 1 or 2, if round = 3, then max game id + 1)
+            const sql = "SELECT * FROM rounds WHERE r_g_id = ? ORDER BY r_num asc;";
+            db.all(sql, [g_id], (err, rounds) => {
+                if (err) {
+                    reject(err);
+                } else if (rounds === undefined) {
+                    resolve(false);
+                } else if (rounds.length == 0) {
+                    resolve(false);
+                }
+                resolve(rounds);
+            })
+        });
+    }
+
+    const getCaptionById = (c_id) => {
+        return new Promise((resolve, reject) => {
+            const sql = "SELECT * FROM captions WHERE c_id = ?;";
+            db.get(sql, [c_id], (err, caption) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(caption.caption);
+                }
+            });
+        });
+    }
+
+    this.savePlay = (user, meme, c_id, valid) => {
+        return new Promise((resolve, reject) => {
+            // Get last game id for user
             const getMaxGameSql = 'SELECT MAX(g_id) AS max_game FROM games WHERE g_user = ?;';
-            let nextGame;          
+            let curGameId;
             db.get(getMaxGameSql, [user], (err, row) => {
                 if (err) {
                     return reject(err);
                 }
-                nextGame = row.max_game || 1;
+                curGameId = row.max_game || 1;
 
-                // Now find the next round (if round = 3, then next round = 1, else next round = round + 1)
-                const getMaxRoundSql = 'SELECT MAX(g_round) AS max_round FROM games WHERE g_id = ?;';
+                // Now find round index to insert play
+                const getMaxRoundSql = 'SELECT MAX(r_num) AS max_round FROM rounds WHERE r_g_id = ?;';
                 let nextRound;
-                db.get(getMaxRoundSql, [nextGame], (err, row) => {
+                db.get(getMaxRoundSql, [curGameId], (err, round) => {
                     if (err) {
                         return reject(err);
                     }
-                    if (row.max_round == 3) {
+                    if (round === undefined) {
                         nextRound = 1;
-                        nextGame += 1;
-                    } else {
-                        nextRound = row.max_round + 1;
                     }
-
-                    // Finally insert the new row
-                    const insertRoundSql = `INSERT INTO games (g_id, g_round, g_user, g_meme, g_c_id, valid, g_date)
-                                            VALUES (?, ?, ?, ?, ?, ?, ?);`;
-                    
-                    db.run(insertRoundSql, [nextGame, nextRound, user, meme, c_id, valid, date], function(err) {
+                    else {
+                        nextRound = round.max_round + 1;
+                    }
+                    // Finally insert the new round
+                    const insertRoundSql = `INSERT INTO rounds (r_g_id, r_meme, \
+                        r_c_id, r_valid, r_num) VALUES (?, ?, ?, ?, ?);`;
+                    db.run(insertRoundSql, [curGameId, meme, c_id, valid, nextRound], function (err) {
                         if (err) {
                             return reject(err);
                         }
                         resolve(true);
                     });
+                    // If last round, mark game as completed
+                    if (nextRound == 3) {
+                        const completeGameSql = `UPDATE games SET g_complete = 1 WHERE g_id = ?;`;
+                        db.run(completeGameSql, [curGameId], function (err) {
+                            if (err) {
+                                return reject(err);
+                            }
+                        });
+                    }
                 });
             });
         })
+    }
+
+    this.addGame = (user) => {
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO games (g_user) VALUES (?);`;
+            db.run(sql, [user], function (err) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(true);
+            });
+        });
     }
 }
