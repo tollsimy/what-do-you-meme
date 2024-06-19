@@ -25,7 +25,7 @@ const corsOptions = {
     origin: 'http://localhost:5173',
     credentials: true,
 };
-app.use(cors(corsOptions));
+router.use(cors(corsOptions));
 
 // enable sessions in Express
 router.use(session({
