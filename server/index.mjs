@@ -111,7 +111,7 @@ router.post('/sessions',
         passport.authenticate('local', (err, user, info) => {
             if (err) { return next(err); }
             // Username / Password incorrect
-            if (!user) { res.status(501).json(info) }
+            if (!user) { res.status(401).json(info) }
             req.logIn(user, (err) => {
                 if (err) { return next(err); }
                 else next();
