@@ -14,33 +14,27 @@ export default function GamesDao() {
                     if (games.length == 0) {
                         resolve([])
                     }
-                    // map each game into a promise that gets all rounds for that game
-                    games.map((game) => {
-                        getRoundsByGameId(game.g_id).then((rounds) => {
-                            // get caption from r_c_id
-                            const captionsPromises = rounds.map((round) => {
-                                return getCaptionById(round.r_c_id);
-                            });
-                            Promise.all(captionsPromises)
-                                .then((captions) => {
-                                    // format data
-                                    game.rounds = rounds.map((round, index) => {
-                                        return {
-                                            meme: round.r_meme,
-                                            caption: captions[index],
-                                            won: round.r_valid
-                                        }
-                                    });
-                                    resolve({
-                                        game: game.g_id,
-                                        rounds: game.rounds
-                                    });
-                                })
-                                .catch((err) => {
-                                    reject(err);
-                                });
-                        });
-                    });
+                    // format games
+                    const formattedGames = await Promise.all(games.map(async (game) => {
+                        // get rounds by game id
+                        const rounds = await getRoundsByGameId(game.g_id);
+                        // get caption from r_c_id
+                        const captionsPromises = rounds.map((round) => getCaptionById(round.r_c_id));
+                        const captions = await Promise.all(captionsPromises);
+                        const newGame = {
+                            game: game.g_id,
+                            rounds: rounds.map((round, index) => {
+                                const caption = captions.length > index ? captions[index] : null;
+                                return {
+                                    meme: round.r_meme,
+                                    caption: caption,
+                                    won: round.r_valid
+                                };
+                            })
+                        };
+                        return newGame;
+                    }));
+                    resolve(formattedGames);
                 }
             });
         })

@@ -25,6 +25,21 @@ export default function UserDao() {
         });
     };
 
+    this.getUserInfo = (username) => {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM users WHERE username=?';
+            db.get(sql, [username], (err, row) => {
+                if (err) { reject(err); }
+                else if (row === undefined) { resolve(false); }
+                else {
+                    // TODO: add other data here when implemented
+                    const user = { username: row.username };
+                    resolve(user);
+                }
+            });
+        });
+    }
+
     this.createUser = (username, password) => {
         return new Promise((resolve, reject) => {
             const salt = crypto.randomBytes(8).toString('hex');

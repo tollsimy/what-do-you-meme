@@ -193,6 +193,28 @@ router.post('/users',
 );
 
 /**
+ * GET /api/v1/users/current
+ * Response:    200 with user info if success
+ *              401 if not authenticated
+ *
+ * Description: Get current user info
+ * 
+ **/
+router.get('/users/current',
+    validateRequest,
+    isLoggedIn,
+    (req, res, next) => {
+        userController.getUserInfo(req.user.username)
+            .then((val) => {
+                res.json(val);
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+);
+
+/**
  * PATCH /api/v1/users/current
  * Body: password
  * Response:    200 if success
@@ -232,6 +254,7 @@ router.get('/users/current/games',
     (req, res, next) => {
         gameController.getGames(req.user.username)
             .then((val) => {
+                console.log(val);
                 res.json(val);
             })
             .catch((err) => {
@@ -279,7 +302,7 @@ router.get('/game',
 
 /**
  * POST /api/v1/game
- * Body: meme, caption_id, captions
+ * Body: meme, c_id, captions_id
  * Response:    200 with won if success
  *              401 if not authenticated
  * 
@@ -290,15 +313,19 @@ router.get('/game',
  **/
 router.post('/game',
     body("meme").isString(),
-    body("caption_id").isInt(),
-    body("captions").isArray(),
+    body("c_id").custom((value) => {
+        // If no caption chosen
+        if (value === null) return true;
+        if (typeof value === "number") return true;
+    }),
+    body("captions_id").isArray(),
     validateRequest,
     (req, res, next) => {
-        gameController.checkAnswer(req.body.meme, req.body.caption_id, req.body.captions)
+        gameController.checkAnswer(req.body.meme, req.body.c_id, req.body.captions_id)
             .then(({val, answer1, answer2}) => {
                 // If authenticated save play
                 if (req.isAuthenticated()) {
-                    gameController.savePlay(req.user.username, req.body.meme, req.body.caption_id, val)
+                    gameController.savePlay(req.user.username, req.body.meme, req.body.c_id, val)
                         .then((_) => {
                             res.json({ won: val, caption1: answer1, caption2: answer2 });
                         })

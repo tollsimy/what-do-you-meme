@@ -13,6 +13,15 @@ export default function UserController() {
         }
     }
 
+    this.getUserInfo = async (username) => {
+        try {
+            const user = await userDao.getUserInfo(username);
+            return user;
+        } catch(err) {
+            throw err;
+        }
+    }
+
     this.createUser = async (username, password) => {
         try {
             const user = await userDao.createUser(username, password);

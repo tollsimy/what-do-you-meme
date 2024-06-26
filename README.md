@@ -158,31 +158,31 @@
             "captions":
             [
                 {   
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
             ]
@@ -196,100 +196,100 @@
             "meme": "<meme_filename>",
             "captions":
             [
-                {
-                    "caption_id": <caption_id>,
+                {   
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-            ]
-        },
-        {
-            "meme": "<meme_filename>",
-            "captions":
-            [
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
-                    "caption": "<caption>"
-                },
-                {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
             ]
         },
-        {
+                {
             "meme": "<meme_filename>",
             "captions":
             [
-                {
-                    "caption_id": <caption_id>,
+                {   
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
                 {
-                    "caption_id": <caption_id>,
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+            ]
+        },
+                {
+            "meme": "<meme_filename>",
+            "captions":
+            [
+                {   
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
+                    "caption": "<caption>"
+                },
+                {
+                    "c_id": <caption_id>,
                     "caption": "<caption>"
                 },
             ]
@@ -306,7 +306,7 @@
     ```json
     {
         "meme": "<meme_filename>",
-        "caption_id": <caption_id>,
+        "c_id": <caption_id / null>,
         "captions":
         [
             <caption_id>,
@@ -362,8 +362,8 @@ columns:
 ### Table `rounds`
 columns:
 - **r_id** INTEGER PRIMARY KEY AUTOINCREMENT -> contains the id of the round
-- **r_g_id** INTEGER FOREIGN KEY             -> contains the id of the game
-- **r_meme** TEXT FOREIGN KEY                -> contains the filename of the meme
+- **r_g_id** INTEGER FOREIGN KEY NOT NULL    -> contains the id of the game
+- **r_meme** TEXT FOREIGN KEY NOT NULL       -> contains the filename of the meme
 - **r_c_id** INTEGER FOREIGN KEY             -> contains the id of the caption
 - **r_valid** INTEGER NOT NULL CHECK (r_valid IN (0, 1)) -> contains the value of the round (0 = lost, 1 = won)
 - **r_num** INTEGER NOT NULL CHECK (r_num IN (1, 2, 3)) -> contains the number of the round
@@ -402,7 +402,7 @@ CREATE TABLE rounds (
     r_id INTEGER PRIMARY KEY AUTOINCREMENT,
     r_g_id INTEGER NOT NULL,
     r_meme TEXT NOT NULL,
-    r_c_id INTEGER NOT NULL,
+    r_c_id INTEGER,
     r_valid INTEGER NOT NULL CHECK (r_valid IN (0, 1)) DEFAULT 0,
     r_num INTEGER NOT NULL CHECK (r_num IN (1, 2, 3)),
     FOREIGN KEY (r_g_id) REFERENCES games(g_id),
