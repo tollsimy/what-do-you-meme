@@ -225,7 +225,7 @@ export function PlayRoundLayout() {
                                                         name="radioGroup"
                                                     />
                                                     <label
-                                                        className="btn btn-outline-success"
+                                                        className={`btn ${won ? (captionId === caption.c_id ? 'btn-success' : 'btn-danger') : "btn-outline-primary"}`}
                                                         htmlFor={caption.c_id}
                                                         style={{
                                                             display: 'block',
