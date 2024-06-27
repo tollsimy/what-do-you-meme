@@ -3,12 +3,12 @@ const SERVER_URL = 'http://localhost:3001/api/v1';
 /* Helper functions */
 
 async function handleInvalidResponse(response) {
-    if (!response.ok) { throw Error(response.statusText) }
+    if (!response.ok) { throw Error(response.status) }
     let type = response.headers.get('Content-Type');
     if (type !== null && type.indexOf('application/json') === -1) {
         throw new TypeError(`Expected JSON, got ${type}`)
     }
-    return await response.json();
+    return await response;
 }
 
 /* API functions */
@@ -56,6 +56,15 @@ async function signup(username, password) {
     return await handleInvalidResponse(response);
 }
 
+async function getUserInfo() {
+    const URL = SERVER_URL + '/users/current';
+    const response = await fetch(URL, {
+        method: 'GET',
+        credentials: 'include',
+    })
+    return await handleInvalidResponse(response);
+}
+
 async function changePassword(password) {
     const URL = SERVER_URL + '/users/current';
     const response = await fetch(URL, {
@@ -87,15 +96,23 @@ async function getNewGame() {
     return await handleInvalidResponse(response);
 }
 
-async function sendAnswer(meme, caption_id, captions) {
+async function sendAnswer(meme, c_id, captions_id) {
     const URL = SERVER_URL + '/game';
     const response = await fetch(URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ meme, caption_id, captions }),
+        body: JSON.stringify({ meme, c_id, captions_id }),
         credentials: 'include',
+    })
+    return await handleInvalidResponse(response);
+}
+
+async function getScoreboard() {
+    const URL = SERVER_URL + '/users/scoreboard';
+    const response = await fetch(URL, {
+        method: 'GET',
     })
     return await handleInvalidResponse(response);
 }
@@ -105,12 +122,14 @@ async function sendAnswer(meme, caption_id, captions) {
 const API = {
     login,
     amILoggedIn,
+    getUserInfo,
     logout,
     signup,
     changePassword,
     getGamesHistory,
     getNewGame,
     sendAnswer,
+    getScoreboard,
 };
 
 export default API;

@@ -69,6 +69,11 @@ export default function GameController() {
             }
         }
         if (corr_answers.length != 2) {
+            console.log("Corr answ:" + corr_answers);
+            console.log("Answers:" + answers);
+            console.log("Captions:" + captions);
+            console.log("Meme:" + meme);
+            console.log("Caption_id:" + caption_id);
             throw new Error('Error: Correct answers not found');
         }
         return {val: res, answer1: corr_answers[0], answer2: corr_answers[1]};

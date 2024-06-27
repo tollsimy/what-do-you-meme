@@ -1,6 +1,20 @@
 import { Container, Col, Row, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';    
 
 export default function PageNotFoundLayout() {
+
+    const navigate = useNavigate();
+
+    const [_, setTimer] = useState(5);
+
+    useEffect(() => {
+        const interval = setTimeout(() => {
+            navigate("/");
+        }, 5000);
+        return () => clearTimeout(interval);
+    }, []);
+
     return (
         <Container fluid>
             <Row className="align-items-center">
@@ -12,10 +26,10 @@ export default function PageNotFoundLayout() {
                     />
                 </Col>
                 <Col>
-                    <h1><h1>404</h1></h1>
-                    <h2>Meme not found</h2>
+                    <p style={{fontSize: "150px"}}>404</p>
+                    <h2>Meme not found, redirecting..</h2>
                     <br />
-                    <Button href="/" variant="primary">Take me away</Button>
+                    <Button onClick={() => navigate("/")} variant="primary">Take me away</Button>
                 </Col>
             </Row>
         </Container>

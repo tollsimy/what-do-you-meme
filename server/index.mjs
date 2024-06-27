@@ -215,6 +215,27 @@ router.get('/users/current',
 );
 
 /**
+ * GET /api/v1/users/scoreboard
+ * Response:    200 with scoreboard if success
+ *              401 if not authenticated
+ * 
+ * Description: Get all users scoreboard
+ * 
+ **/
+router.get('/users/scoreboard',
+    validateRequest,
+    (req, res, next) => {
+        userController.getScoreboard()
+            .then((val) => {
+                res.json(val);
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+);
+
+/**
  * PATCH /api/v1/users/current
  * Body: password
  * Response:    200 if success
@@ -254,7 +275,6 @@ router.get('/users/current/games',
     (req, res, next) => {
         gameController.getGames(req.user.username)
             .then((val) => {
-                console.log(val);
                 res.json(val);
             })
             .catch((err) => {

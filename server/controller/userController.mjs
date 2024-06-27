@@ -39,4 +39,13 @@ export default function UserController() {
             throw err;
         }
     }
+
+    this.getScoreboard = async () => {
+        try {
+            const scoreboard = await userDao.getScoreboard();
+            return scoreboard;
+        } catch(err) {
+            throw err;
+        }
+    }
 }

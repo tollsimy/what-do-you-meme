@@ -63,7 +63,31 @@ export default function GamesDao() {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(caption.caption);
+                    if (caption === undefined) {
+                        resolve(null);
+                    }
+                    else {
+                        resolve(caption.caption);
+                    }
+                }
+            });
+        });
+    }
+
+    // Not really gamesDao, but it's a helper function
+    const updateUserScore = (user, g_id) => {
+        const sql = `SELECT r_valid FROM rounds WHERE r_g_id = ?;`;
+        db.all(sql, [g_id], (err, rounds) => {
+            if (err) {
+                return err;
+            }
+            const score = rounds.reduce((acc, round) => {
+                return acc + (round.r_valid ? 5 : 0);
+            }, 0);
+            const updateScoreSql = `UPDATE users SET score = score + ? WHERE username = ?;`;
+            db.run(updateScoreSql, [score, user], function (err) {
+                if (err) {
+                    return err;
                 }
             });
         });
@@ -102,13 +126,14 @@ export default function GamesDao() {
                         }
                         resolve(true);
                     });
-                    // If last round, mark game as completed
+                    // If last round, mark game as completed and update user score
                     if (nextRound == 3) {
                         const completeGameSql = `UPDATE games SET g_complete = 1 WHERE g_id = ?;`;
                         db.run(completeGameSql, [curGameId], function (err) {
                             if (err) {
                                 return reject(err);
                             }
+                            updateUserScore(user, curGameId);
                         });
                     }
                 });

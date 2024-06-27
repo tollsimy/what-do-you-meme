@@ -33,7 +33,7 @@ export default function UserDao() {
                 else if (row === undefined) { resolve(false); }
                 else {
                     // TODO: add other data here when implemented
-                    const user = { username: row.username };
+                    const user = { username: row.username, score: row.score };
                     resolve(user);
                 }
             });
@@ -78,4 +78,17 @@ export default function UserDao() {
             });
         });
     };
+
+    this.getScoreboard = () => {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT username, score FROM users ORDER BY score DESC';
+            db.all(sql, [], (err, rows) => {
+                if (err) { reject(err); }
+                else {
+                    const scoreboard = rows.map((row) => ({ username: row.username, score: row.score }));
+                    resolve(scoreboard);
+                }
+            });
+        });
+    }
 }

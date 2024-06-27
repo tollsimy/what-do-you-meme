@@ -1,5 +1,125 @@
 #root {
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+}
+.text_blink {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.sidebar-right {
+    border-left: 2px solid #dee2e6;
+    padding-left: 50px;
+    position: fixed;
+    top: 12%;
+    bottom: 10%;
+    right: 1%;
+    z-index: 100;
+    padding: 50px 0 0;
+}
+
+.profile-left {
+    position: fixed;
+    top: 12%;
+    bottom: 10%;
+    left: 10%;
+    z-index: 100;
+    padding: 50px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.rainbow {
+    height: 80%;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
+    background-size: 1800% 1800%;
+
+    color: #FFFFFF !important;
+
+    font-size: large;
+
+    -webkit-animation: rainbow 18s ease infinite;
+    -z-animation: rainbow 18s ease infinite;
+    -o-animation: rainbow 18s ease infinite;
+    animation: rainbow 18s ease infinite;
+}
+
+@-webkit-keyframes rainbow {
+    0% {
+        background-position: 0% 82%
+    }
+
+    50% {
+        background-position: 100% 19%
+    }
+
+    100% {
+        background-position: 0% 82%
+    }
+}
+
+@-moz-keyframes rainbow {
+    0% {
+        background-position: 0% 82%
+    }
+
+    50% {
+        background-position: 100% 19%
+    }
+
+    100% {
+        background-position: 0% 82%
+    }
+}
+
+@-o-keyframes rainbow {
+    0% {
+        background-position: 0% 82%
+    }
+
+    50% {
+        background-position: 100% 19%
+    }
+
+    100% {
+        background-position: 0% 82%
+    }
+}
+
+@keyframes rainbow {
+    0% {
+        background-position: 0% 82%
+    }
+
+    50% {
+        background-position: 100% 19%
+    }
+
+    100% {
+        background-position: 0% 82%
+    }
+}
+
+.logo {
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    right: 20%;
+}
+
+.header-footer-color {
+    background-color: #227cc04b;
 }
