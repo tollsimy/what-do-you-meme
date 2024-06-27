@@ -62,6 +62,9 @@ function AppHeader() {
                                     <NavDropdown.Item onClick={() => navigate("/signup")} hidden={user}>
                                         Signup
                                     </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => navigate("/profile")} hidden={!user}>
+                                        Profile
+                                    </NavDropdown.Item>
                                     <NavDropdown.Item onClick={logoutFunc} hidden={!user}>
                                         Logout
                                     </NavDropdown.Item>

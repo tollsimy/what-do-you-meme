@@ -339,7 +339,7 @@ export function PlayStatsLayout() {
                                                         <img
                                                             src={"/images/memes/" + round.meme}
                                                             alt="meme"
-                                                            style={{ width: '250px', height: 'auto' }}
+                                                            style={{ width: '200px', height: 'auto' }}
                                                         />
                                                         <p style={{ marginLeft: '10px' }}>{round.captions.find((caption) => caption.c_id == round.captionId).caption}</p>
                                                     </div>

@@ -42,7 +42,7 @@ function LoginPageLayout() {
             if (err.message === "401") {
                 setError("Invalid username or password");
             } else {
-                setError("Error signing up");
+                setError("Error signing in");
             }
         }
     }
@@ -101,21 +101,31 @@ function SignupPageLayout() {
             return;
         }
         setError('');
-
-        API.signup(username, password)
-            .then((response) => {
+        
+        try {
+            const responseSignup = await API.signup(username, password)
+            if (responseSignup.status === 200) {
+                const responseSignupJson = await responseSignup.json();
+                const response = await API.login(username, password);
                 if (response.status === 200) {
-                    contextLogout();
+                    const userInfoResponse = await API.getUserInfo(username);
+                    const data = await userInfoResponse.json();
+                    const gamesHistoryResponse = await API.getGamesHistory();
+                    const games = await gamesHistoryResponse.json();
+                    contextLogin(data, games);
                     navigate('/');
                 }
-            }).catch((err) => {
-                if (err.message == "409") {
-                    setError("Username already exists");
-                }
-                else {
-                    setError("Error signing up");
-                }
-            });
+            }
+        } catch (err) {
+            if (err.message === "409") {
+                setError("Username already exists");
+            } else if (err.message === "401") {
+                setError("Invalid username or password");
+            }
+            else {
+                setError("Error signing up");
+            }
+        }
     }
 
     return (
