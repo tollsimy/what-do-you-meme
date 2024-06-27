@@ -29,8 +29,8 @@ export default function CaptionsDao() {
             // return all rows that DOES HAVE that caption_id
             // return caption with that caption_id
             const sql = 'SELECT * FROM captions WHERE c_id IN \
-                (SELECT mc_c_id FROM memes_captions \
-                    WHERE mc_c_id IN \
+                (SELECT c_id FROM captions \
+                    WHERE c_id IN \
                         (SELECT mc_c_id FROM memes_captions WHERE mc_meme = ?) \
                     ORDER BY RANDOM() LIMIT ? \
                 );'
