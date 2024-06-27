@@ -6,7 +6,7 @@ export default function GamesDao() {
         return new Promise((resolve, reject) => {
             // Get all completed games played by user
             const sql = "SELECT * FROM games WHERE g_user = ? AND g_complete = 1 \
-                ORDER BY g_id asc;";
+                ORDER BY g_id desc;";
             db.all(sql, [username], async (err, games) => {
                 if (err) { reject(err); }
                 else if (games === undefined) { resolve([]); }

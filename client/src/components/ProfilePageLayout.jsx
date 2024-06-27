@@ -23,10 +23,10 @@ export function ProfileIndexLayout() {
     // handle manually refreshing the page
     useEffect(() => {
         if (userGamesHistory.length - gameNumber < 0) {
-            setGames([...userGamesHistory].reverse());
+            setGames([...userGamesHistory]);
         }
         else {
-            setGames([...userGamesHistory.slice(userGamesHistory.length - gameNumber, userGamesHistory.length)].reverse());
+            setGames([...userGamesHistory.slice(0, gameNumber)]);
         }
     }, [userGamesHistory]);
 

@@ -278,6 +278,7 @@ export function PlayStatsLayout() {
     const { game, setGame, roundsPlayed, setRoundsPlayed } = useContext(GameContext);
     const wonRounds = roundsPlayed.filter(round => round.won).length;
     const shibaImage = `lv${wonRounds}_shiba.webp`;
+    const shibaImageAnonym = wonRounds ? "lv3_shiba.webp" : "lv0_shiba.webp";
 
     // After a game, update user context to get new user score and games
     const updateUserContext = async () => {
@@ -352,12 +353,26 @@ export function PlayStatsLayout() {
                         <Col>
                             {
                                 <>
-                                    <img
-                                        src={"/images/site-images/" + shibaImage}
-                                        alt="shiba-img"
-                                        style={{ width: '250px', height: 'auto' }}
-                                    />
-                                    <h3>Score: {Number(5 * Number(roundsPlayed.filter((round) => round.won == true).length))}/15 XPs</h3>
+                                    {   user ? (
+                                            <img
+                                                src={"/images/site-images/" + shibaImage}
+                                                alt="shiba-img"
+                                                style={{ width: '250px', height: 'auto' }}
+                                            />
+                                        ) : (
+                                            <img
+                                            src={"/images/site-images/" + shibaImageAnonym}
+                                            alt="shiba-img"
+                                            style={{ width: '250px', height: 'auto' }}
+                                            />
+                                        )
+                                    }
+                                    {   user ? (
+                                            <h3>Score: {Number(5 * Number(roundsPlayed.filter((round) => round.won == true).length))}/15 XPs</h3>
+                                        ) : (
+                                            <h3>Score: {Number(5 * Number(roundsPlayed.filter((round) => round.won == true).length))}/5 XPs</h3>
+                                        )
+                                    }
                                 </>
                             }
                         </Col>
